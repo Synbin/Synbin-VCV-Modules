@@ -1,0 +1,43 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build & install application",
+            "type": "shell",
+            "command": "make",
+            "windows":{
+                "command": "make",
+                "args": ["-j7","install"]
+            },
+            "options": {
+                "cwd": "${workspaceRoot}",
+                "env":{
+                    "PATH": "C:\\msys64\\usr\\bin\\;C:\\msys64\\mingw64\\bin",
+                    "RACK_USER_DIR": "E:\\OneDrive\\Documents\\Rack"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": {
+                "owner": "cpp",
+                "fileLocation": ["absolute"],
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                }
+            }
+        }
+    ]
+}

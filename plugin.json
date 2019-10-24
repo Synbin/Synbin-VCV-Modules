@@ -1,0 +1,22 @@
+{
+  "slug": "Synbin",
+  "name": "Synbin",
+  "version": "1.0.0",
+  "license": "GPL-3.0-or-later",
+  "brand": "Synbin",
+  "author": "John Spink",
+  "authorEmail": "john@synbin.com",
+  "authorUrl": "",
+  "pluginUrl": "",
+  "manualUrl": "",
+  "sourceUrl": "",
+  "donateUrl": "",
+  "modules": [
+    {
+      "slug": "NoiseMachine",
+      "name": "MFOS Noise Toaster",
+      "description": "",
+      "tags": []
+    }
+  ]
+}

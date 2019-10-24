@@ -1,0 +1,42 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceRoot}",
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/ext",
+                "${workspaceRoot}/dep/include",
+                "C:\\msys64\\mingw64\\include\\c++\\9.2.0",
+                "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
+                "C:\\msys64\\mingw64\\include\\c++\\9.2.0\\x86_64-w64-mingw32",
+                "C:\\msys64\\mingw64\\lib\\gcc\\x86_64-w64-mingw32\\9.2.0\\include",
+                "E:\\vcv-dev\\Rack\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}",
+                    "${workspaceRoot}/include",
+                    "${workspaceRoot}/ext",
+                    "${workspaceRoot}/dep/include",
+                    "C:\\msys64\\mingw64\\include\\c++\\9.2.0",
+                    "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
+                    "C:\\msys64\\mingw64\\include\\c++\\9.2.0\\x86_64-w64-mingw32",
+                    "C:\\msys64\\mingw64\\lib\\gcc\\x86_64-w64-mingw32\\9.2.0\\include",
+                    "E:\\vcv-dev\\Rack\\include"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.15.26726/bin/Hostx64/x64/cl.exe",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
