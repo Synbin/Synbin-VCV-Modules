@@ -2,102 +2,13 @@
 #include "widgets.hpp"
 #include "NoiseMachine.hpp"
 #include "dsp/resampler.hpp"
+#include "lfo.hpp"
+#include "argen.hpp"
 
 using namespace widgets;
 using namespace rack;
 using namespace dsp;
-
-struct LowFrequencyOscillator
-{
-	float phase = 0.f;
-	float freq;
-	const float pulseWidth = .5f;
-	const float syncDirection = 1.f;
-
-	dsp::TRCFilter<float> plsFilter;
-
-	float triValue = 0.f;
-	float sqrValue = 0.f;
-	float plsValue = 0.f;
-
-	void setPitch(float pitch)
-	{
-		freq = dsp::FREQ_C4 * dsp::approxExp2_taylor5(pitch + 30) / 1073741824;
-	}
-
-	void process(float deltaTime)
-	{
-		// Advance phase
-		float deltaPhase = simd::clamp(freq * deltaTime, 1e-6f, 0.35f);
-		phase += deltaPhase;
-
-		// Wrap phase
-		phase -= simd::floor(phase);
-
-		// Tri
-		triValue = tri(phase);
-
-		// Square
-		sqrValue = sqr(phase);
-
-		// Pulse
-		plsValue = pls(phase, deltaTime);
-
-	}
-
-	// Triangle wave ------------------------------------------------
-	float tri(float phase) {
-		float v;
-		float x = phase + 0.25f;
-		x -= simd::trunc(x);
-		float halfX = (x >= 0.5f);
-		x *= 2;
-		x -= simd::trunc(x);
-		v = expCurve(x) * simd::ifelse(halfX, 1.f, -1.f);
-		return v;
-	}
-
-	float tri()
-	{
-		return triValue;
-	}
-
-	float expCurve(float x)
-	{
-		return (3 + x * (-13 + 5 * x)) / (3 + 2 * x);
-	}
-
-	// Square wave --------------------------------------------------
-	float sqr(float phase) {
-		float v = phase < pulseWidth ? 1.f : -1.f;
-		return v;
-	}
-
-	float sqr() {
-		return sqrValue;
-	}
-
-	// Pulse wave ---------------------------------------------------
-	float pls(float phase, float deltaTime) {
-		float v = phase < pulseWidth ? 1.f : -1.f;
-		plsFilter.setCutoffFreq(20.f * deltaTime);
-		plsFilter.process(v);
-		v = plsFilter.highpass() * 0.95f;
-		return v;
-	}
-
-	float pls()
-	{
-		return plsValue;
-	}
-
-	// Rate LED -----------------------------------------------------
-	float light()
-	{
-		return simd::sin(2 * float(M_PI) * phase);
-	}
-
-};
+using namespace simd;
 
 struct NoiseMachine : Module
 {
@@ -106,9 +17,13 @@ struct NoiseMachine : Module
 	float vcoPhase = 0.f;
 	float vcoFreq = 0.f;
 	float lfoOutput = 0.f;
-	float lfoLED = 0.0f;
+	float lfoLED = 0.f;
 	float vcfOutput = 0.f;
+	float arGenOutput = 0.f;
 	float sampleTime, sampleRate;
+
+	LFO oscillators[3];
+	ARGen arGen;
 
 	NoiseMachine()
 	{
@@ -132,10 +47,11 @@ struct NoiseMachine : Module
 		configParam(OUTPUT_VOLUME, 0.f, 1.f, 0.5f, "Output Volume");
 
 		// AR Section
-		configParam(AR_ATTACK, 0.f, 2.5f, 0.f, "AR Attack Time", "s");
-		configParam(AR_RELEASE, 0.f, 2.5f, 0.f, "AR Release Time", "s");
+		configParam(AR_ATTACK, 2.5f, 2500.f, 2.5f, "AR Attack Time", "mS");
+		configParam(AR_RELEASE, 2.5f, 3000.f, 2.5f, "AR Release Time", "ms");
 		configParam(AR_REPEAT, 0.f, 1.f, 0.f, "AR Repeat");
 		configParam(AR_MANUAL, 0.f, 1.f, 0.f, "AR Manual");
+		arGen.reset();
 
 		// LFO Section
 		configParam(LFO_RATE, -7.f, -1.f, -2.f, "Freq", "Hz"); // 2Hz to 130Hz
@@ -145,7 +61,6 @@ struct NoiseMachine : Module
 
 	void process(const ProcessArgs &args) override
 	{
-
 		sampleTime = args.sampleTime;
 		sampleRate = args.sampleRate;
 
@@ -162,6 +77,15 @@ struct NoiseMachine : Module
 		float noise = .5f * random::normal();
 
 		// Compute the AR generator output ----------------------------------------------
+		arGen.setAttackRate((params[AR_ATTACK].getValue()/1000.0)*sampleRate);
+		arGen.setReleaseRate((params[AR_RELEASE].getValue()/1000.0)*sampleRate);
+		// check to see if "Repeat" is on or one-shot pressed
+		if(params[AR_REPEAT].getValue()>0.0 || params[AR_MANUAL].getValue()>0.0){
+			if(arGen.state == 0) {
+				arGen.state = 1;
+			}
+		}
+        arGenOutput = arGen.process();
 
 		// process the VCF --------------------------------------------------------------
 		if (params[VCF_INPUT_SEL].getValue() < 1.f)
@@ -176,9 +100,6 @@ struct NoiseMachine : Module
 
 	// LFO Section ----------------------------------------------------------------------
 
-	#define NUM_OSCILLATORS 3
-	LowFrequencyOscillator oscillators[NUM_OSCILLATORS];
-
 	float lfoProcess()
 	{
 		float freqParam = params[LFO_RATE].getValue();
@@ -188,7 +109,7 @@ struct NoiseMachine : Module
 
 		float multiplier = rescaleOutput(freqParam);
 
-		for (int c = 0; c < NUM_OSCILLATORS; c++)
+		for (int c = 0; c < 3; c++)
 		{
 			auto *oscillator = &oscillators[c];
 
@@ -275,7 +196,6 @@ struct NoiseMachine : Module
 		return lp;
 	}
 
-	// AR Generator Section -------------------------------------------------------------
 };
 
 struct NMWidget : ModuleWidget
