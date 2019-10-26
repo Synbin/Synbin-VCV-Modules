@@ -14,8 +14,8 @@
   "modules": [
     {
       "slug": "NoiseMachine",
-      "name": "MFOS Noise Toaster",
-      "description": "",
+      "name": "Noise Machine",
+      "description": "Based on MFOS Noise Toaster",
       "tags": []
     }
   ]
