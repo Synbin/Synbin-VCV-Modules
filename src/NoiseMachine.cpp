@@ -83,11 +83,17 @@ struct NoiseMachine : Module
         if (params[AR_REPEAT].getValue() > 0.0 || params[AR_MANUAL].getValue() > 0.0)
         {
             if (arGen.state == 0)
-            {
+                arGen.state = 1;
+        }
+        // Re-trigger the AR generator if one-shot is pressed and we are not repeating
+        if (params[AR_REPEAT].getValue() < 1.0 && params[AR_MANUAL].getValue() > 0.0) {
+            if (arGen.state == 1) {
+                arGen.reset();
                 arGen.state = 1;
             }
         }
         arGenOutput = arGen.process();
+        //DEBUG("arGen output = %f",arGenOutput);
 
         // process the VCF --------------------------------------------------------------
         if (params[VCF_INPUT_SEL].getValue() < 1.f)
@@ -157,8 +163,12 @@ struct NoiseMachine : Module
     void vcoInit()
     {
         float rate = params[VCO_FREQ].getValue();
-        rate += inputs[PITCH_INPUT].getVoltage() / 5.f;
-        rate += lfoOutput * params[VCO_LFO_MOD].getValue();
+        rate += inputs[PITCH_INPUT].getVoltage() / 5.f;             // add in external cv
+        rate += lfoOutput * params[VCO_LFO_MOD].getValue();         // add in LFO modulation
+        if (params[VCO_AR_MOD_SW].getValue() > 0.0) {               // add in SR generator if enabled
+            rate += arGenOutput * params[VCO_AR_MOD].getValue();
+        } 
+
         vcoFreq = dsp::FREQ_C4 * std::pow(2.f, (rate * 2.0));
         vcoPhase += vcoFreq * sampleTime;
         if (vcoPhase >= 0.5f)
@@ -180,7 +190,14 @@ struct NoiseMachine : Module
     // VCF Section ----------------------------------------------------------------------
     float vcfProcess(float input)
     {
-        float cutoffFreq = std::pow(2.f, rescale(clamp(params[VCF_FREQ].getValue() + params[VCF_MOD_DEPTH].getValue() * lfoOutput, 0.f, 1.f), 0.f, 1.f, 4.5f, 13.f));
+        float mod = 0.0;
+        if (params[VCF_MOD_SRC].getValue() > 0.0) {         // mod source is AR Generator
+            mod = arGenOutput * params[VCF_MOD_DEPTH].getValue();
+        } else {                                            // mod source is LFO
+            mod = lfoOutput * params[VCF_MOD_DEPTH].getValue();
+        }
+        
+        float cutoffFreq = std::pow(2.f, rescale(clamp(params[VCF_FREQ].getValue() + mod, 0.f, 1.f), 0.f, 1.f, 4.5f, 13.f));
         return vcfCalcOutput(input, cutoffFreq);
     }
 
@@ -213,8 +230,7 @@ struct NMWidget : ModuleWidget
 
     NMWidget(NoiseMachine *module)
     {
-        fprintf(stderr, "Welcome to Noise Machine!\n");
-        fflush(stderr);
+        INFO("%s","Welcome to Noise Machine!");
         setModule(module);
         auto panel = APP->window->loadSvg(asset::plugin(pluginInstance, "res/NoiseMachineV2.svg"));
         setPanel(panel);
@@ -267,7 +283,6 @@ struct NMWidget : ModuleWidget
                 else if (!strcmp(type, "BUTTON"))
                 {
                     addParam(adjust(createParam<PushButton>(loc, module, id)));
-                    //addParam(adjust(createParam<Button18>(loc, module, id)));
                 }
             }
         }
