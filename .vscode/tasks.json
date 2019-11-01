@@ -13,7 +13,7 @@
                 "cwd": "${workspaceRoot}",
                 "env":{
                     "PATH": "C:\\msys64\\usr\\bin\\;C:\\msys64\\mingw64\\bin",
-                    "RACK_USER_DIR": "E:\\OneDrive\\Documents\\Rack"
+                    "RACK_USER_DIR": "D:\\OneDrive\\Documents\\Rack"
                 }
             },
             "group": {

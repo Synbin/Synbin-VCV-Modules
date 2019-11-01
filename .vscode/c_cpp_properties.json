@@ -11,7 +11,7 @@
                 "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
                 "C:\\msys64\\mingw64\\include\\c++\\9.2.0\\x86_64-w64-mingw32",
                 "C:\\msys64\\mingw64\\lib\\gcc\\x86_64-w64-mingw32\\9.2.0\\include",
-                "E:\\vcv-dev\\Rack\\include"
+                "D:\\vcv-dev\\Rack\\include"
             ],
             "defines": [
                 "_DEBUG",
@@ -28,7 +28,7 @@
                     "C:\\msys64\\mingw64\\x86_64-w64-mingw32\\include",
                     "C:\\msys64\\mingw64\\include\\c++\\9.2.0\\x86_64-w64-mingw32",
                     "C:\\msys64\\mingw64\\lib\\gcc\\x86_64-w64-mingw32\\9.2.0\\include",
-                    "E:\\vcv-dev\\Rack\\include"
+                    "D:\\vcv-dev\\Rack\\include"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
