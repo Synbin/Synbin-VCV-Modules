@@ -32,6 +32,7 @@ enum OutputIds {
     FINAL_OUTPUT,
     LFO_OUTPUT,
     VCO_OUTPUT,
+    AR_OUTPUT,
     NUM_OUTPUTS
 };
 

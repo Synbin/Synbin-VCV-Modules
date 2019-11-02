@@ -93,6 +93,7 @@ struct NoiseMachine : Module
             }
         }
         arGenOutput = arGen.process();
+        outputs[AR_OUTPUT].setVoltage(arGenOutput);
         //DEBUG("arGen output = %f",arGenOutput);
 
         // process the VCF --------------------------------------------------------------
@@ -201,14 +202,14 @@ struct NoiseMachine : Module
         return vcfCalcOutput(input, cutoffFreq);
     }
 
-    float vcfCalcOutput(float sample, float cutOff)
+    float vcfCalcOutput(float input, float cutOff)
     {
         static float mem1 = 0.f;
         static float mem2 = 0.f;
         static float lp = 0.f;
         float g = tan(float(M_PI) * cutOff / sampleRate);
         float R = 1.0f / (2.0f * params[VCF_RESO].getValue());
-        float hp = (sample - (2.0f * R + g) * mem1 - mem2) / (1.0f + 2.0f * R * g + g * g);
+        float hp = (input - (2.0f * R + g) * mem1 - mem2) / (1.0f + 2.0f * R * g + g * g);
         float bp = g * hp + mem1;
         lp = g * bp + mem2;
         mem1 = g * hp + bp;
@@ -232,7 +233,7 @@ struct NMWidget : ModuleWidget
     {
         INFO("%s","Welcome to Noise Machine!");
         setModule(module);
-        auto panel = APP->window->loadSvg(asset::plugin(pluginInstance, "res/NoiseMachineV2.svg"));
+        auto panel = APP->window->loadSvg(asset::plugin(pluginInstance, "res/NoiseMachineV3.svg"));
         setPanel(panel);
 
         addChild(createWidget<ScrewSilver>(Vec(RACK_GRID_WIDTH, 0)));
