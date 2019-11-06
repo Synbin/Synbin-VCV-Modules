@@ -102,6 +102,11 @@ struct NoiseMachine : Module
         else
             vcfOutput = vcfProcess(noise);
 
+        // process the VCA --------------------------------------------------------------
+        if (params[VCA_SWITCH].getValue() < 1.f) {             // apply VCA to VCF output
+            vcfOutput = clamp((vcfOutput * arGenOutput), -5.f, 5.f);
+        }
+
         // Set the final output ---------------------------------------------------------
         outputs[FINAL_OUTPUT].setVoltage(clamp((vcfOutput * params[OUTPUT_VOLUME].getValue()), -5.f, 5.f));
 
@@ -148,7 +153,7 @@ struct NoiseMachine : Module
     }
 
     // Rescale output voltage so it stays constant across range
-    // Code provided by Jack Spink, Programmer, Sumo Digital Nottingham
+    // Code provided by my youngest son, Jack Spink, Programmer, Sumo Digital Nottingham
     float rescaleOutput(float input)
     {
         float initialRangeStart = paramQuantities[LFO_RATE]->getMinValue();
@@ -243,7 +248,7 @@ struct NMWidget : ModuleWidget
 
         addChild(createLight<SmallLight<RedLight>>(mm2px(Vec(98.f, 118.f)), module, LightIds::LFO_LED));
 
-        // Code added by Dr. Tom Spink, University of Edinburgh
+        // Code added by my eldest son, Dr. Tom Spink, University of Edinburgh
         // Loop over each shape in the panel SVG and place control.
         for (auto shape = panel->handle->shapes; shape; shape = shape->next)
         {
