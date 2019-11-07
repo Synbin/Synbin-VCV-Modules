@@ -72,6 +72,9 @@ struct NoiseMachine : Module
         // Process the VCO --------------------------------------------------------------
         vcoInit();
         float vcoFreq = params[VCO_SHAPE_SW].getValue() > 0.0f ? vcoRamp() : vcoSqr();
+        float vcoVolt = vcoFreq * 5.f;
+
+        outputs[VCO_OUTPUT].setVoltage(vcoVolt);
 
         // Generate some (Gaussian) noise -----------------------------------------------
         float noise = .5f * random::normal();
@@ -183,13 +186,11 @@ struct NoiseMachine : Module
 
     float vcoRamp()
     {
-        outputs[VCO_OUTPUT].setVoltage(((2 * (vcoPhase + 0.5f)) - 1.f) * 5.f);
         return (2 * (vcoPhase + 0.5f)) - 1.f;
     }
 
     float vcoSqr()
     {
-        outputs[VCO_OUTPUT].setVoltage((vcoPhase < 0.f ? -1.f : 1.f) * 5.f);
         return vcoPhase < 0.f ? -1.f : 1.f;
     }
 
